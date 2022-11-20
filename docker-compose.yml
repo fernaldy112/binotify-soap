@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+#  soap:
+#    ports:
+#      - "8080:80"
+  soapdb:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=soapdb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - "./scripts/db:/docker-entrypoint-initdb.d"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "9001:80"
+    environment:
+      - PMA_HOST=soapdb
+      - PMA_PORT=3306
