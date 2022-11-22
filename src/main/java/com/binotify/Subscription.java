@@ -46,7 +46,9 @@ public class Subscription {
         while (rs.next()) {
             int creatorId = rs.getInt("creator_id");
             int subscriberId = rs.getInt("subscriber_id");
-            SubscriptionStatus status = SubscriptionStatus.PENDING;
+            //SubscriptionStatus status = SubscriptionStatus.PENDING;
+            String statusStr = rs.getString("status");
+            SubscriptionStatus status = SubscriptionStatus.from(statusStr);
             Subscription subscription = new Subscription(creatorId, subscriberId, status);
             subscriptions.add(subscription);
         }

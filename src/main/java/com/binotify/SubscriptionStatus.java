@@ -12,4 +12,13 @@ public enum SubscriptionStatus {
             case PENDING -> "PENDING";
         };
     }
+
+    public static SubscriptionStatus from(String status){
+        return switch (status){
+            case "ACCEPTED" -> SubscriptionStatus.ACCEPTED;
+            case "REJECTED" -> SubscriptionStatus.REJECTED;
+            case "PENDING" -> SubscriptionStatus.PENDING;
+            default -> null;
+        };
+    }
 }
