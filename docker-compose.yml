@@ -1,28 +1,34 @@
-version: '3.3'
+version: '3.5'
 services:
   soap:
     build: .
+    hostname: soap
     networks:
       - binotify
     ports:
       - "8081:80"
   soapdb:
     image: mysql:latest
+    hostname: soapdb
     command: --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_DATABASE=soapdb
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=password
+    networks:
+      - binotify
     volumes:
       - "./scripts/db:/docker-entrypoint-initdb.d"
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     ports:
-      - "8082:80"
+      - "9002:80"
     environment:
       - PMA_HOST=soapdb
       - PMA_PORT=3306
+    networks:
+      - binotify
 
 networks:
   binotify:
