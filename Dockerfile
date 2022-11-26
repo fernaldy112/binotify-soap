@@ -1,8 +1,7 @@
-FROM maven:3.8.6-openjdk-18
+FROM eclipse-temurin:latest
 
 WORKDIR /usr/src/binotify-soap
-COPY . .
-RUN mvn package
-
+COPY ./target/binotify-soap-1.0-SNAPSHOT.jar binotify-soap.jar
 EXPOSE 80
-ENTRYPOINT ['java', '-jar', 'target/binotify-soap-1.0-SNAPSHOT.jar']
+
+ENTRYPOINT ["java", "-jar", "binotify-soap.jar"]
