@@ -60,7 +60,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         Statement statement = connection.createStatement();
         statement.executeUpdate("UPDATE subscription SET status = '"
-                + status.toString() + "' WHERE" + "creator_id = "
+                + status.toString() + "' WHERE " + "creator_id = "
                 + creatorId + " AND subscriber_id = " + subscriberId);
     }
 
