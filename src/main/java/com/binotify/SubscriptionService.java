@@ -14,5 +14,5 @@ public interface SubscriptionService {
     void rejectRequest(int creatorId, int subscriberId) throws SQLException;
 
     @WebMethod
-    Subscription[] getPendingSubscription() throws SQLException;
+    Subscription[] getPendingSubscription(int page) throws SQLException;
 }

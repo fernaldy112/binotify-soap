@@ -23,7 +23,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription[] getPendingSubscription() throws SQLException{
+    public Subscription[] getPendingSubscription(int page) throws SQLException{
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
@@ -35,7 +35,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Connection connection = DriverManager.getConnection(url, props);
 
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT * FROM subscription WHERE status='pending'");
+        int offset = (page - 1) * 20;
+        ResultSet rs = statement.executeQuery("SELECT * FROM subscription WHERE status = 'pending' LIMIT 21 OFFSET " + offset);
 
         Subscription[] subsArr = Subscription.castToSubscription(rs);
 
