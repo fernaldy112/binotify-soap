@@ -1,11 +1,12 @@
 version: '3.3'
 services:
-#  soap:
-#    ports:
-#      - "8080:80"
-  soapdb:
+  soap:
+    build: .
+    networks:
+      - binotify
     ports:
-      - "3307:3306"
+      - "8081:80"
+  soapdb:
     image: mysql:latest
     command: --default-authentication-plugin=mysql_native_password
     environment:
@@ -22,3 +23,7 @@ services:
     environment:
       - PMA_HOST=soapdb
       - PMA_PORT=3306
+
+networks:
+  binotify:
+    external: true
