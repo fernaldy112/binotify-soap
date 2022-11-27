@@ -12,33 +12,42 @@ import static com.binotify.Env.ENV;
 @WebService
 public class SubscriptionServiceImpl implements SubscriptionService {
 
+    private static String ENDPOINT = "/subscription";
+    private Logging log;
+
     @WebMethod
     public void acceptRequest(int creatorId, int subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.ACCEPTED);
+        desc = "acceptRequest";
+        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
     }
 
     @WebMethod
     public void rejectRequest(int creatorId, int subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.REJECTED);
+        desc = "rejectRequest";
+        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
     }
 
     @Override
-    public Subscription[] getPendingSubscription(int page) throws SQLException{
+    public Subscription[] getPendingSubscription(int page) throws SQLException {
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
         String url = String.format("jdbc:mysql://%s:%s/%s",
                 ENV.get("DB_HOST"),
                 ENV.get("DB_PORT"),
-                ENV.get("DB_NAME")
-        );
+                ENV.get("DB_NAME"));
         Connection connection = DriverManager.getConnection(url, props);
 
         Statement statement = connection.createStatement();
         int offset = (page - 1) * 20;
-        ResultSet rs = statement.executeQuery("SELECT * FROM subscription WHERE status = 'pending' LIMIT 21 OFFSET " + offset);
+        ResultSet rs = statement
+                .executeQuery("SELECT * FROM subscription WHERE status = 'pending' LIMIT 21 OFFSET " + offset);
 
         Subscription[] subsArr = Subscription.castToSubscription(rs);
+        desc = "pendingSubscription";
+        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
 
         return subsArr;
     }
@@ -51,23 +60,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String url = String.format("jdbc:mysql://%s:%s/%s",
                 ENV.get("DB_HOST"),
                 ENV.get("DB_PORT"),
-                ENV.get("DB_NAME")
-        );
+                ENV.get("DB_NAME"));
         Connection connection = DriverManager.getConnection(url, props);
 
         Statement statement = connection.createStatement();
         statement.executeUpdate("INSERT INTO subscription VALUES ("
                 + Integer.toString(subscription.getCreatorId()) + ", "
                 + Integer.toString(subscription.getSubscriberId()) + ", '"
-                + subscription.getStatus().toString() + "')"
-                );
+                + subscription.getStatus().toString() + "')");
+
+        desc = "addNewSubscription";
+        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
     }
 
     private void updateSubscriptionStatus(
             int creatorId,
             int subscriberId,
-            SubscriptionStatus status
-    ) throws SQLException {
+            SubscriptionStatus status) throws SQLException {
 
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
@@ -75,8 +84,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String url = String.format("jdbc:mysql://%s:%s/%s",
                 ENV.get("DB_HOST"),
                 ENV.get("DB_PORT"),
-                ENV.get("DB_NAME")
-        );
+                ENV.get("DB_NAME"));
         Connection connection = DriverManager.getConnection(url, props);
 
         Statement statement = connection.createStatement();
@@ -86,4 +94,3 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
 }
-
