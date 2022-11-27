@@ -29,6 +29,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         this.log(desc, SubscriptionServiceImpl.ENDPOINT);
     }
 
+    @WebMethod
+    public String getStatus(int creatorId, int subscriberId) throws SQLException {
+        Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+
+        ResultSet res = statement.executeQuery("SELECT * FROM subscription WHERE creator_id = "
+                + creatorId + " AND subscriber_id = " + subscriberId + ";");
+        Subscription[] subscriptions = Subscription.castToSubscription(res);
+
+        return subscriptions.length > 0
+                ? subscriptions[0].getStatus().toString()
+                : null;
+    }
+
     @Override
     public Subscription[] getPendingSubscription(int page) throws SQLException {
         Properties props = new Properties();
@@ -77,7 +91,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             int creatorId,
             int subscriberId,
             SubscriptionStatus status) throws SQLException {
+        Connection connection = getConnection();
 
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("UPDATE subscription SET status = '"
+                + status.toString() + "' WHERE creator_id = "
+                + creatorId + " AND subscriber_id = " + subscriberId);
+    }
+
+    private static Connection getConnection() throws SQLException {
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
@@ -85,12 +107,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 ENV.get("DB_HOST"),
                 ENV.get("DB_PORT"),
                 ENV.get("DB_NAME"));
-        Connection connection = DriverManager.getConnection(url, props);
-
-        Statement statement = connection.createStatement();
-        statement.executeUpdate("UPDATE subscription SET status = '"
-                + status.toString() + "' WHERE " + "creator_id = "
-                + creatorId + " AND subscriber_id = " + subscriberId);
+        return DriverManager.getConnection(url, props);
     }
 
 }

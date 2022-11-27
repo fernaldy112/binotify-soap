@@ -17,5 +17,8 @@ public interface SubscriptionService {
     Subscription[] getPendingSubscription(int page) throws SQLException;
 
     @WebMethod
+    String getStatus(int creatorId, int subscriberId) throws SQLException;
+
+    @WebMethod
     void addNewSubscription(Subscription subscription) throws  SQLException;
 }
