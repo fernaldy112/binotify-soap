@@ -1,8 +1,13 @@
 package com.binotify;
 
+import jakarta.annotation.Resource;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
+import jakarta.xml.ws.spi.http.HttpExchange;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,25 +17,35 @@ import java.util.Properties;
 
 import static com.binotify.Env.ENV;
 
-// TODO: test db connection
+// TODO: add meaningful log description
 @WebService
 public class SubscriptionServiceImpl implements SubscriptionService {
 
-    private static String ENDPOINT = "/subscription";
-    private Logging log;
+    @Resource
+    WebServiceContext context;
 
     @WebMethod
     public void acceptRequest(int creatorId, int subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.ACCEPTED);
-        desc = "acceptRequest";
-        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
+
+        SubscriptionServiceImpl.log(
+                this.getClientIpAddress(),
+                "subscription#acceptRequest",
+                "blah",
+                new Timestamp(System.currentTimeMillis()).toString()
+        );
     }
 
     @WebMethod
     public void rejectRequest(int creatorId, int subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.REJECTED);
-        desc = "rejectRequest";
-        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
+
+        SubscriptionServiceImpl.log(
+                this.getClientIpAddress(),
+                "subscription#rejectRequest",
+                "blah",
+                new Timestamp(System.currentTimeMillis()).toString()
+        );
     }
 
     @WebMethod
@@ -41,6 +56,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         ResultSet res = statement.executeQuery("SELECT * FROM subscription WHERE creator_id = "
                 + creatorId + " AND subscriber_id = " + subscriberId + ";");
         Subscription[] subscriptions = Subscription.castToSubscription(res);
+
+        SubscriptionServiceImpl.log(
+                this.getClientIpAddress(),
+                "subscription#getStatus",
+                "blah",
+                new Timestamp(System.currentTimeMillis()).toString()
+        );
 
         return subscriptions.length > 0
                 ? subscriptions[0].getStatus().toString()
@@ -64,8 +86,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .executeQuery("SELECT * FROM subscription WHERE status = 'pending' LIMIT 21 OFFSET " + offset);
 
         Subscription[] subsArr = Subscription.castToSubscription(rs);
-        desc = "pendingSubscription";
-        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
+
+        SubscriptionServiceImpl.log(
+                this.getClientIpAddress(),
+                "subscription#getPendingSubscription",
+                "blah",
+                new Timestamp(System.currentTimeMillis()).toString()
+        );
 
         return subsArr;
     }
@@ -83,12 +110,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         Statement statement = connection.createStatement();
         statement.executeUpdate("INSERT INTO subscription VALUES ("
-                + Integer.toString(subscription.getCreatorId()) + ", "
-                + Integer.toString(subscription.getSubscriberId()) + ", '"
+                + subscription.getCreatorId() + ", "
+                + subscription.getSubscriberId() + ", '"
                 + subscription.getStatus().toString() + "')");
 
-        desc = "addNewSubscription";
-        this.log(desc, SubscriptionServiceImpl.ENDPOINT);
+        SubscriptionServiceImpl.log(
+                this.getClientIpAddress(),
+                "subscription#addNewSubscription",
+                "blah",
+                new Timestamp(System.currentTimeMillis()).toString()
+        );
+
+    }
+
+    private String getClientIpAddress() {
+        MessageContext messageContext = context.getMessageContext();
+        HttpExchange exchange = (HttpExchange) messageContext.get("com.sun.xml.ws.http.exchange");
+        InetAddress address = exchange.getRemoteAddress().getAddress();
+        return address.toString();
     }
 
     private void updateSubscriptionStatus(
@@ -129,6 +168,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 ENV.get("DB_PORT"),
                 ENV.get("DB_NAME"));
         return DriverManager.getConnection(url, props);
+    }
+
+    private static void log(String ipAddress, String endpoint, String description, String timestamp) throws
+            SQLException {
+        Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+
+
+        statement.executeQuery(
+                String.format(
+                        "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES (%s, %s, %s, %s)",
+                        description,
+                        ipAddress,
+                        endpoint,
+                        timestamp
+                )
+                );
     }
 
 }

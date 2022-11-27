@@ -1,28 +1,40 @@
+// ! TODO: remove
+
 package com.binotify;
 
-import jakarta.jws.WebMethod;
-import jakarta.jws.WebService;
+import jakarta.annotation.Resource;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
+import jakarta.xml.ws.spi.http.HttpExchange;
+
+import java.net.InetSocketAddress;
 import java.sql.*;
 
 public class Logging {
+
+    @Resource
+    WebServiceContext context;
 
     private int id;
     private String description;
     private String IP;
     private String endpoint;
-    private String requested_at;
+    private String requestedAt;
 
     public Logging(String description, String endpoint) {
-        this.description = description;
-        HttpExchange exchange = (HttpExchange) msgx.get("com.sun.xml.ws.http.exchange");
-        InetSocketAddress remoteAddress = exchange.getRemoteAddress();
-        String remoteHost = remoteAddress.getHostName();
-        this.IP = remoteHost;
-        this.endpoint = endpoint;
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        this.requested_at = timestamp;
-        ResultSet rs = statement.executeQuery(
-                "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES (this.description, this.IP, this.endpoint, this.requested_at)");
+//        this.description = description;
+//        MessageContext messageContext = context.getMessageContext();
+//        HttpExchange exchange = (HttpExchange) messageContext.get("com.sun.xml.ws.http.exchange");
+//        InetSocketAddress remoteAddress = exchange.getRemoteAddress();
+//        String remoteHost = remoteAddress.getHostName();
+//        this.IP = remoteHost;
+//        this.endpoint = endpoint;
+//        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+//        this.requestedAt = timestamp.toString();
+//
+//
+//        ResultSet rs = statement.executeQuery(
+//                "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES (this.description, this.IP, this.endpoint, this.requested_at)");
     }
 
     public int getId() {
@@ -57,11 +69,11 @@ public class Logging {
         this.endpoint = endpoint;
     }
 
-    public String getRequested_at() {
-        return requested_at;
+    public String getRequestedAt() {
+        return requestedAt;
     }
 
-    public void setRequested_at(String requested_at) {
-        this.requested_at = requested_at;
+    public void setRequestedAt(String requestedAt) {
+        this.requestedAt = requestedAt;
     }
 }
