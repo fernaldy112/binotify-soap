@@ -43,6 +43,26 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subsArr;
     }
 
+    @Override
+    public void addNewSubscription(Subscription subscription) throws SQLException {
+        Properties props = new Properties();
+        props.put("user", ENV.get("DB_USER"));
+        props.put("password", ENV.get("DB_PASS"));
+        String url = String.format("jdbc:mysql://%s:%s/%s",
+                ENV.get("DB_HOST"),
+                ENV.get("DB_PORT"),
+                ENV.get("DB_NAME")
+        );
+        Connection connection = DriverManager.getConnection(url, props);
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("INSERT INTO subscription VALUES ("
+                + Integer.toString(subscription.getCreatorId()) + ", "
+                + Integer.toString(subscription.getSubscriberId()) + ", '"
+                + subscription.getStatus().toString() + "')"
+                );
+    }
+
     private void updateSubscriptionStatus(
             int creatorId,
             int subscriberId,
