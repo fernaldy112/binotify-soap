@@ -87,6 +87,11 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.30</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun.net.httpserver</groupId>
+            <artifactId>http</artifactId>
+            <version>20070405</version>
+        </dependency>
     </dependencies>
 
 </project>

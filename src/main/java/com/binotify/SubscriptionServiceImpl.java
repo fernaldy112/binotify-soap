@@ -1,11 +1,11 @@
 package com.binotify;
 
+import com.sun.net.httpserver.HttpExchange;
 import jakarta.annotation.Resource;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.handler.MessageContext;
-import jakarta.xml.ws.spi.http.HttpExchange;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -127,7 +127,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         MessageContext messageContext = context.getMessageContext();
         HttpExchange exchange = (HttpExchange) messageContext.get("com.sun.xml.ws.http.exchange");
         InetAddress address = exchange.getRemoteAddress().getAddress();
-        return address.toString();
+        return address.toString().replace("/", "");
     }
 
     private void updateSubscriptionStatus(
@@ -175,16 +175,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Connection connection = getConnection();
         Statement statement = connection.createStatement();
 
+        String query = String.format(
+                "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES ('%s', '%s', '%s', '%s')",
+                description,
+                ipAddress,
+                endpoint,
+                timestamp
+        );
 
-        statement.executeQuery(
-                String.format(
-                        "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES (%s, %s, %s, %s)",
-                        description,
-                        ipAddress,
-                        endpoint,
-                        timestamp
-                )
-                );
+        statement.executeUpdate(query);
     }
 
 }
