@@ -3,6 +3,10 @@ package com.binotify;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.*;
 import java.util.Properties;
 
@@ -97,6 +101,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         statement.executeUpdate("UPDATE subscription SET status = '"
                 + status.toString() + "' WHERE creator_id = "
                 + creatorId + " AND subscriber_id = " + subscriberId);
+
+        String payload = String.format("{\"creatorId\": %d, \"subscriberId\": %d, \"status\": \"%s\"}",
+                creatorId,
+                subscriberId,
+                status
+        );
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(ENV.get("APP_URL") + "/subscribe"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload))
+                    .build();
+
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception ignored) { }
     }
 
     private static Connection getConnection() throws SQLException {
