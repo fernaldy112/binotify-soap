@@ -8,16 +8,16 @@ import java.sql.SQLException;
 public interface SubscriptionService {
 
     @WebMethod
-    void acceptRequest(int creatorId, int subscriberId) throws SQLException;
+    void acceptRequest(Integer creatorId, Integer subscriberId) throws SQLException;
 
     @WebMethod
-    void rejectRequest(int creatorId, int subscriberId) throws SQLException;
+    void rejectRequest(Integer creatorId, Integer subscriberId) throws SQLException;
 
     @WebMethod
-    Subscription[] getPendingSubscription(int page) throws SQLException;
+    Subscription[] getPendingSubscription(Integer page) throws SQLException;
 
     @WebMethod
-    String getStatus(int creatorId, int subscriberId) throws SQLException;
+    String getStatus(Integer creatorId, Integer subscriberId) throws SQLException;
 
     @WebMethod
     void addNewSubscription(Subscription subscription) throws  SQLException;

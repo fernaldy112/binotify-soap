@@ -13,11 +13,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static com.binotify.Env.ENV;
 
-// TODO: add meaningful log description
 @WebService
 public class SubscriptionServiceImpl implements SubscriptionService {
 
@@ -25,31 +26,37 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     WebServiceContext context;
 
     @WebMethod
-    public void acceptRequest(int creatorId, int subscriberId) throws SQLException {
+    public void acceptRequest(Integer creatorId, Integer subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.ACCEPTED);
 
+        List<String> args = new ArrayList<>();
+        args.add(creatorId.toString());
+        args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
                 this.getClientIpAddress(),
-                "subscription#acceptRequest",
-                "blah",
+                "acceptRequest",
+                args,
                 new Timestamp(System.currentTimeMillis()).toString()
         );
     }
 
     @WebMethod
-    public void rejectRequest(int creatorId, int subscriberId) throws SQLException {
+    public void rejectRequest(Integer creatorId, Integer subscriberId) throws SQLException {
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.REJECTED);
 
+        List<String> args = new ArrayList<>();
+        args.add(creatorId.toString());
+        args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
                 this.getClientIpAddress(),
-                "subscription#rejectRequest",
-                "blah",
+                "rejectRequest",
+                args,
                 new Timestamp(System.currentTimeMillis()).toString()
         );
     }
 
     @WebMethod
-    public String getStatus(int creatorId, int subscriberId) throws SQLException {
+    public String getStatus(Integer creatorId, Integer subscriberId) throws SQLException {
         Connection connection = getConnection();
         Statement statement = connection.createStatement();
 
@@ -57,10 +64,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 + creatorId + " AND subscriber_id = " + subscriberId + ";");
         Subscription[] subscriptions = Subscription.castToSubscription(res);
 
+        List<String> args = new ArrayList<>();
+        args.add(creatorId.toString());
+        args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
                 this.getClientIpAddress(),
-                "subscription#getStatus",
-                "blah",
+                "getStatus",
+                args,
                 new Timestamp(System.currentTimeMillis()).toString()
         );
 
@@ -70,7 +80,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription[] getPendingSubscription(int page) throws SQLException {
+    public Subscription[] getPendingSubscription(Integer page) throws SQLException {
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
@@ -87,10 +97,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         Subscription[] subsArr = Subscription.castToSubscription(rs);
 
+        List<String> args = new ArrayList<>();
+        args.add(page.toString());
         SubscriptionServiceImpl.log(
                 this.getClientIpAddress(),
-                "subscription#getPendingSubscription",
-                "blah",
+                "getPendingSubscription",
+                args,
                 new Timestamp(System.currentTimeMillis()).toString()
         );
 
@@ -116,8 +128,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         SubscriptionServiceImpl.log(
                 this.getClientIpAddress(),
-                "subscription#addNewSubscription",
-                "blah",
+                "addNewSubscription",
+                new ArrayList<>(),
                 new Timestamp(System.currentTimeMillis()).toString()
         );
 
@@ -170,11 +182,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return DriverManager.getConnection(url, props);
     }
 
-    private static void log(String ipAddress, String endpoint, String description, String timestamp) throws
+    private static void log(String ipAddress, String method, List<String> args, String timestamp) throws
             SQLException {
         Connection connection = getConnection();
         Statement statement = connection.createStatement();
 
+        StringBuilder argString = new StringBuilder(method).append("(");
+        int size = args.size();
+        for (int i = 0; i < size; i++) {
+            String arg = args.get(i);
+            if (i != 0) argString.append(", ");
+            argString.append(arg);
+        }
+        argString.append(")");
+
+        String endpoint = "subscription#" + method;
+        String description = ipAddress + " called " + argString + " at " + timestamp + ".";
         String query = String.format(
                 "INSERT INTO logging (description, IP, endpoint, requested_at) VALUES ('%s', '%s', '%s', '%s')",
                 description,
