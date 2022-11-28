@@ -44,4 +44,8 @@ public class Context {
         InetAddress address = exchange.getRemoteAddress().getAddress();
         return address.toString().replace("/", "");
     }
+
+    public void invalidate() {
+        this.inner.put("jakarta.xml.ws.http.response.code", 401);
+    }
 }

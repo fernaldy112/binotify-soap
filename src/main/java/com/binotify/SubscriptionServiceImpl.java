@@ -16,8 +16,6 @@ import java.util.Properties;
 
 import static com.binotify.Env.ENV;
 
-// TODO: set 401 http status code on invalid API Key if necessary
-
 @WebService
 public class SubscriptionServiceImpl implements SubscriptionService {
 
@@ -33,7 +31,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private boolean validateApiKey() {
         this.wrapContext();
 
-        return KeyProvider.validate(this.context.getClientApiKey());
+        boolean valid = KeyProvider.validate(this.context.getClientApiKey());
+        if (!valid) {
+            this.context.invalidate();
+        }
+
+        return valid;
     }
 
     @WebMethod
