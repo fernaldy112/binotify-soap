@@ -1,13 +1,10 @@
 package com.binotify;
 
-import com.sun.net.httpserver.HttpExchange;
 import jakarta.annotation.Resource;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceContext;
-import jakarta.xml.ws.handler.MessageContext;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,21 +16,39 @@ import java.util.Properties;
 
 import static com.binotify.Env.ENV;
 
+// TODO: set 401 http status code on invalid API Key if necessary
+
 @WebService
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Resource
-    WebServiceContext context;
+    WebServiceContext serviceContext;
+
+    private Context context;
+
+    private void wrapContext() {
+        this.context = new Context(this.serviceContext);
+    }
+
+    private boolean validateApiKey() {
+        this.wrapContext();
+
+        return KeyProvider.validate(this.context.getClientApiKey());
+    }
 
     @WebMethod
     public void acceptRequest(Integer creatorId, Integer subscriberId) throws SQLException {
+        if (!this.validateApiKey()) {
+            return;
+        }
+
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.ACCEPTED);
 
         List<String> args = new ArrayList<>();
         args.add(creatorId.toString());
         args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
-                this.getClientIpAddress(),
+                this.context.getClientIpAddress(),
                 "acceptRequest",
                 args,
                 new Timestamp(System.currentTimeMillis()).toString()
@@ -42,13 +57,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @WebMethod
     public void rejectRequest(Integer creatorId, Integer subscriberId) throws SQLException {
+        if (!this.validateApiKey()) {
+            return;
+        }
+
         this.updateSubscriptionStatus(creatorId, subscriberId, SubscriptionStatus.REJECTED);
 
         List<String> args = new ArrayList<>();
         args.add(creatorId.toString());
         args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
-                this.getClientIpAddress(),
+                this.context.getClientIpAddress(),
                 "rejectRequest",
                 args,
                 new Timestamp(System.currentTimeMillis()).toString()
@@ -57,6 +76,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @WebMethod
     public String getStatus(Integer creatorId, Integer subscriberId) throws SQLException {
+        if (!this.validateApiKey()) {
+            return null;
+        }
+
         Connection connection = getConnection();
         Statement statement = connection.createStatement();
 
@@ -68,7 +91,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         args.add(creatorId.toString());
         args.add(subscriberId.toString());
         SubscriptionServiceImpl.log(
-                this.getClientIpAddress(),
+                this.context.getClientIpAddress(),
                 "getStatus",
                 args,
                 new Timestamp(System.currentTimeMillis()).toString()
@@ -81,6 +104,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription[] getPendingSubscription(Integer page) throws SQLException {
+        if (!this.validateApiKey()) {
+            return null;
+        }
+
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
@@ -100,7 +127,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<String> args = new ArrayList<>();
         args.add(page.toString());
         SubscriptionServiceImpl.log(
-                this.getClientIpAddress(),
+                this.context.getClientIpAddress(),
                 "getPendingSubscription",
                 args,
                 new Timestamp(System.currentTimeMillis()).toString()
@@ -111,6 +138,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void addNewSubscription(Subscription subscription) throws SQLException {
+        if (!this.validateApiKey()) {
+            return;
+        }
+
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
         props.put("password", ENV.get("DB_PASS"));
@@ -127,7 +158,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 + subscription.getStatus().toString() + "')");
 
         SubscriptionServiceImpl.log(
-                this.getClientIpAddress(),
+                this.context.getClientIpAddress(),
                 "addNewSubscription",
                 new ArrayList<>(),
                 new Timestamp(System.currentTimeMillis()).toString()
@@ -135,12 +166,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     }
 
-    private String getClientIpAddress() {
-        MessageContext messageContext = context.getMessageContext();
-        HttpExchange exchange = (HttpExchange) messageContext.get("com.sun.xml.ws.http.exchange");
-        InetAddress address = exchange.getRemoteAddress().getAddress();
-        return address.toString().replace("/", "");
-    }
 
     private void updateSubscriptionStatus(
             int creatorId,
