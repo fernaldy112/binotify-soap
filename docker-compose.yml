@@ -7,6 +7,8 @@ services:
       - binotify
     ports:
       - "8082:80"
+    volumes:
+      - "./keys:/usr/src/binotify-soap/keys"
   soapdb:
     image: mysql:latest
     hostname: soapdb

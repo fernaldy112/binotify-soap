@@ -158,7 +158,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Connection connection = DriverManager.getConnection(url, props);
 
         Statement statement = connection.createStatement();
-        statement.executeUpdate("INSERT INTO subscription VALUES ("
+        statement.executeUpdate("INSERT INTO subscription (creator_id, subscriber_id, status) VALUES ("
                 + creatorId + ", "
                 + subscriberId + ", '"
                 + status + "')");
