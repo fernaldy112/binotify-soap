@@ -20,5 +20,5 @@ public interface SubscriptionService {
     String getStatus(Integer creatorId, Integer subscriberId) throws SQLException;
 
     @WebMethod
-    void addNewSubscription(Subscription subscription) throws  SQLException;
+    void addNewSubscription(Integer creatorId, Integer subscriberId) throws  SQLException;
 }

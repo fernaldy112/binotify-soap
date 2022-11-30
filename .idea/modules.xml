@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/binotify-soap.iml" filepath="$PROJECT_DIR$/.idea/binotify-soap.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../binotify-soap.iml" filepath="$PROJECT_DIR$/../binotify-soap.iml" />
     </modules>
   </component>
 </project>

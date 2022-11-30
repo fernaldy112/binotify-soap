@@ -140,10 +140,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void addNewSubscription(Subscription subscription) throws SQLException {
+    public void addNewSubscription(Integer creatorId, Integer subscriberId) throws SQLException {
+        System.out.println(Integer.toString(creatorId)+ Integer.toString(subscriberId));
         if (!this.validateApiKey()) {
             return;
         }
+
+        String status = "PENDING";
 
         Properties props = new Properties();
         props.put("user", ENV.get("DB_USER"));
@@ -156,9 +159,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         Statement statement = connection.createStatement();
         statement.executeUpdate("INSERT INTO subscription VALUES ("
-                + subscription.getCreatorId() + ", "
-                + subscription.getSubscriberId() + ", '"
-                + subscription.getStatus().toString() + "')");
+                + creatorId + ", "
+                + subscriberId + ", '"
+                + status + "')");
 
         SubscriptionServiceImpl.log(
                 this.context.getClientIpAddress(),
