@@ -17,7 +17,7 @@ Pada tugas besar ini, kami menggunakan SOAP untuk menangani Logging dan proses  
 
 Here are the list of contributors by functionalities worked on.
 
-Logging : 13520063, 13520166
-Menerima Permintaan Subscription : 13520112
-Penerimaan/Penolakan Permintaan Subscription : 13520166
-Endpoint Check Status Permintaan : 13520166
+Logging : 13520063, 13520166 <br />
+Menerima Permintaan Subscription : 13520112 <br />
+Penerimaan/Penolakan Permintaan Subscription : 13520166 <br />
+Endpoint Check Status Permintaan : 13520166 <br />
