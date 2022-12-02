@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: soapdb:3306
--- Generation Time: Nov 20, 2022 at 07:02 AM
+-- Generation Time: Dec 02, 2022 at 12:38 AM
 -- Server version: 8.0.31
 -- PHP Version: 8.0.19
 
@@ -57,6 +57,12 @@ CREATE TABLE `subscription` (
 ALTER TABLE `logging`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
+
+--
+-- Indexes for table `subscription`
+--
+ALTER TABLE `subscription`
+  ADD PRIMARY KEY (`creator_id`,`subscriber_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
